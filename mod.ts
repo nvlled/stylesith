@@ -1,101 +1,182 @@
 /// <reference lib="es2021.string" />
+/**
+ * Stylesith is a simple, barebones CSS-in-JS library for.
+ * The purpose is to allow scoped, grouped, inline CSS without
+ * the need for additional tooling or syntax. This library is intended
+ * for server-rendered pages, but it's possible to use on client-side
+ * as well.
+ *
+ * @example
+ * ```ts
+ * const boxCSS = createCSS({ scopeName: "box" });
+ *
+ * function Box({ label, color }: { color: string; label: string }) {
+ *   const css = boxCSS;
+ *
+ *   // ## is the placeholder ID, it will be replaced by the actual generated ID *
+ *   return (
+ *     <div id={css.id} style={{ backgroundColor: color }}>
+ *       <div className="label">{label}</div>
+ *       {css`
+ *         ## {
+ *           display: flex;
+ *           align-items: center;
+ *           justify-content: center;
+ *           margin: 5px;
+ *           border: 1px solid black;
+ *           width: 100px;
+ *           height: 100px;
+ *         }
+ *         ## .label {
+ *           color: #0ff;
+ *         }
+ *       `}
+ *     </div>
+ *   );
+ * }
+ * ```
+ *
+ * @module
+ */
 
 export interface StyleSith {
-  styles: string[];
   getAllCSS(): string;
-  createCSS(options: CreateCSSOptions): CSS;
+  clearCSS(): void;
+  removeCSS(cssID: string): void;
+  createCSS(options?: Options): CSS;
+  onChange(fn: (event: ChangeEvent) => void): RemoveEventHandler;
+}
+
+export type WithCSSFunc = (css: CSS) => string | null;
+
+export interface Options {
+  scopeName?: string;
+  placeholder?: string;
 }
 
 export interface CSS {
   (strings: TemplateStringsArray, ...args: (string | number)[]): string | null;
   id: string;
-  creator?: StyleSith;
 }
 
-const defaultScope = "component";
-const defaultPlaceholder = "##";
-const defaultSith = createInstance();
-
-export interface CreateCSSOptions {
+export interface Options {
+  idPrefix?: string;
   scopeName?: string;
   placeholder?: string;
-  once?: boolean;
-  defer?: boolean;
 }
 
-export function createInstance(defaults: CreateCSSOptions = {}): StyleSith {
+export interface ChangeEvent {
+  id?: string;
+  css?: string;
+  type: "add" | "remove" | "clear";
+}
+
+export type ChangeEventHandler = (event: ChangeEvent) => void;
+export type RemoveEventHandler = () => void;
+
+// TODO: show example of how IDS are generated based on example
+export const defaultOptions: Required<Options> = {
+  idPrefix: "sith__",
+  scopeName: "component",
+  placeholder: "##",
+};
+
+export function createInstance(defaults: Options = {}): StyleSith {
+  const options = { ...defaults, ...defaultOptions };
+  const styles: Record<string, string> = {};
+  const listeners = new Set<ChangeEventHandler>();
+  const counters: Record<string, number> = {};
   const self: StyleSith = {
-    styles: [],
     getAllCSS: function (): string {
-      return self.styles.join(" ");
+      return Object.values(styles).join(" ");
     },
-    createCSS(options: CreateCSSOptions = {}): CSS {
-      options.placeholder ??= defaults.placeholder;
-      options.defer ??= defaults.defer;
-      const css = createCSS(options);
-      css.creator = self;
+
+    removeCSS(cssID: string) {
+      delete styles[cssID];
+      dispatchChange("remove", cssID);
+    },
+
+    clearCSS() {
+      for (const k of Object.keys(styles)) {
+        delete styles[k];
+      }
+      dispatchChange("clear");
+    },
+
+    createCSS({
+      idPrefix = options.idPrefix,
+      scopeName = options.scopeName,
+      placeholder = options.placeholder,
+    }: Options = {}): CSS {
+      const id = nextID(idPrefix, scopeName);
+
+      const css: CSS = (
+        strings: TemplateStringsArray,
+        ...args: (string | number)[]
+      ): null => {
+        let result = styles[id];
+
+        if (!result) {
+          const values: string[] = [];
+          for (let i = 0; i < strings.raw.length; i++) {
+            values.push(strings.raw[i]);
+            if (args[i]) values.push(args[i].toString());
+          }
+          result = values
+            .join("")
+            .replaceAll(placeholder, "#" + id)
+            .replaceAll(/\s+/g, " ")
+            .trim();
+
+          styles[id] = result;
+          dispatchChange("add", id, result);
+        }
+
+        return null;
+      };
+
+      css.id = id;
       return css;
     },
+
+    onChange: function (fn: ChangeEventHandler): () => void {
+      listeners.add(fn);
+      return () => listeners.delete(fn);
+    },
   };
+
+  function dispatchChange(
+    type: ChangeEvent["type"],
+    id?: string,
+    css?: string
+  ) {
+    const event = {
+      id,
+      css,
+      type,
+    };
+    for (const fn of listeners) {
+      fn(event);
+    }
+  }
+
+  function nextID(idPrefix: string, scopeName: string) {
+    const count = (counters[scopeName] ?? 0) + 1;
+    const id = idPrefix + scopeName + (count === 1 ? "" : count).toString();
+    counters[scopeName] = count;
+    return id;
+  }
+
   return self;
 }
 
-export interface CreateCSSOptions {
-  scopeName?: string;
-  placeholder?: string;
-  once?: boolean;
-  defer?: boolean;
+const defaultSith = createInstance();
+
+export const getAllCSS = defaultSith.getAllCSS;
+export const clearCSS = defaultSith.clearCSS;
+export const createCSS = defaultSith.createCSS;
+export const removeCSS = defaultSith.removeCSS;
+
+export function inlineCSS(strings: TemplateStringsArray) {
+  return strings.raw.join("");
 }
-
-const counters: Record<string, number> = {};
-
-export function createCSS({
-  scopeName: scope = defaultScope,
-  placeholder = defaultPlaceholder,
-  once = false,
-  defer = false,
-}: CreateCSSOptions = {}): CSS {
-  const count = (counters[scope] ?? 0) + 1;
-  const id = scope + "__" + count;
-  counters[scope] = count;
-
-  let lastResult: string | undefined;
-  const css: CSS = (
-    strings: TemplateStringsArray,
-    ...args: (string | number)[]
-  ) => {
-    const values: string[] = [];
-    for (let i = 0; i < strings.raw.length; i++) {
-      values.push(strings.raw[i]);
-      if (args[i]) values.push(args[i].toString());
-    }
-
-    const result =
-      once && lastResult !== undefined
-        ? lastResult
-        : values
-            .join("")
-            .replaceAll(placeholder, "#" + id)
-            .replaceAll(/\s+/g, "");
-
-    lastResult = result;
-
-    if (defer) {
-      if (css.creator) css.creator.styles.push(result);
-      return null;
-    }
-
-    return result;
-  };
-
-  css.creator = defaultSith;
-  css.id = id;
-
-  return css;
-}
-
-export function getAllCSS() {
-  return defaultSith.getAllCSS();
-}
-
-export const css = createCSS({ defer: false, once: false });
