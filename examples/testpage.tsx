@@ -36,7 +36,10 @@ const boxCSS = createCSS({ scopeName: "box" });
 // The css result is only computed once.
 // Note for the dynamic styling, the style attribute is used.
 function Box({ label, color }: { color: string; label: string }) {
+  // using css as the variable name allows formatting
+  // and syntax highlighting for some editors
   const css = boxCSS;
+
   return (
     <div id={css.id} style={{ backgroundColor: color }}>
       <div className="label">{label}</div>

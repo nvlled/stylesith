@@ -1,16 +1,18 @@
 /// <reference lib="es2021.string" />
 /**
- * Stylesith is a simple, barebones CSS-in-JS library for.
+ * Stylesith is a simple, barebones CSS-in-JS library.
  * The purpose is to allow scoped, grouped, inline CSS without
  * the need for additional tooling or syntax. This library is intended
- * for server-rendered pages, but it's possible to use on client-side
+ * for server-rendered pages, but it's possible to use it on client-side
  * as well.
  *
  * @example
- * ```ts
+ * ```tsx
  * const boxCSS = createCSS({ scopeName: "box" });
  *
  * function Box({ label, color }: { color: string; label: string }) {
+ *   // using css as the variable name allows formatting
+ *   // and syntax highlighting for some editors
  *   const css = boxCSS;
  *
  *   // ## is the placeholder ID, it will be replaced by the actual generated ID *
