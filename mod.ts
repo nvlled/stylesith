@@ -15,12 +15,12 @@
  *   // and syntax highlighting for some editors
  *   const css = boxCSS;
  *
- *   // ## is the placeholder ID, it will be replaced by the actual generated ID *
+ *   // #x is the placeholder ID, it will be replaced by the actual generated ID *
  *   return (
  *     <div id={css.id} style={{ backgroundColor: color }}>
  *       <div className="label">{label}</div>
  *       {css`
- *         ## {
+ *         #x {
  *           display: flex;
  *           align-items: center;
  *           justify-content: center;
@@ -29,7 +29,7 @@
  *           width: 100px;
  *           height: 100px;
  *         }
- *         ## .label {
+ *         #x .label {
  *           color: #0ff;
  *         }
  *       `}
@@ -80,7 +80,7 @@ export type RemoveEventHandler = () => void;
 export const defaultOptions: Required<Options> = {
   idPrefix: "sith__",
   scopeName: "component",
-  placeholder: "##",
+  placeholder: "#x",
 };
 
 export function createInstance(defaults: Options = {}): StyleSith {

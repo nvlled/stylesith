@@ -8,15 +8,15 @@ function Container({ children }: { children: JSX.Children }) {
   return (
     <div id={css.id}>
       {css`
-        ## {
+        #x {
           width: 500px;
         }
-        ## > header {
+        #x > header {
           color: red;
         }
-        ## > footer {
+        #x > footer {
         }
-        ##-contents {
+        #x-contents {
           display: flex;
           width: 500px;
         }
@@ -43,9 +43,9 @@ function Box({ label, color }: { color: string; label: string }) {
   return (
     <div id={css.id} style={{ backgroundColor: color }}>
       <div className="label">{label}</div>
-      {/* ## is the placeholder ID, it will be replaced by the actual generated ID */}
+      {/* #x is the placeholder ID, it will be replaced by the actual generated ID */}
       {css`
-        ## {
+        #x {
           display: flex;
           align-items: center;
           justify-content: center;
@@ -54,7 +54,7 @@ function Box({ label, color }: { color: string; label: string }) {
           width: 100px;
           height: 100px;
         }
-        ## .label {
+        #x .label {
           color: #0ff;
         }
       `}
@@ -70,7 +70,7 @@ function Circle({ label, color }: { color: string; label: string }) {
     <div id={css.id}>
       <div className="label">{label}</div>
       {css`
-        ## {
+        #x {
           display: flex;
           align-items: center;
           justify-content: center;
@@ -81,7 +81,7 @@ function Circle({ label, color }: { color: string; label: string }) {
           width: 100px;
           height: 100px;
         }
-        ## .label {
+        #x .label {
           color: #0ff;
         }
       `}

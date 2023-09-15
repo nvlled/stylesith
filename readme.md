@@ -15,20 +15,23 @@ It is left as an exercise for the reader to ponder
 whether there's a typo in the library name.
 
 ```tsx
+import { createCSS } from "https://deno.land/x/stylesith/mod.ts";
+const css = createCSS()
+
 <div id={css.id} style={{ backgroundColor: color }}>
   <div className="label">{label}</div>
   {css`
-    ## {
+    #x {
       display: flex;
       align-items: center;
       margin: 5px;
       border: 1px solid black;
     }
-    ## .label {
+    #x .label {
       color: #0ff;
     }
   `}
-</div>
+</div>;
 ```
 
 ## Why not just use a plain CSS?
