@@ -3,6 +3,7 @@
   "remote": {
     "https://deno.land/x/jsx_to_string@v0.3.0/mod.ts": "8648558daba0f1f006c056f4dc90372365e2db3ded92fd7b90fb1b115632c402",
     "https://deno.land/x/jsx_to_string@v0.4.0/mod.ts": "7d73de16116cea8856d69145119980e20ebefe6148e474569a59512a60617c27",
-    "https://deno.land/x/jsx_to_string@v0.5.0/mod.ts": "72907d8d18be716d477ac42440812bfcfe3c85530d8d5d58b17ba6759bbada64"
+    "https://deno.land/x/jsx_to_string@v0.5.0/mod.ts": "72907d8d18be716d477ac42440812bfcfe3c85530d8d5d58b17ba6759bbada64",
+    "https://deno.land/x/stylesith@v0.1.0/mod.ts": "8248a4ed4a27d9815b22b10a6907277b0e9ad123f943d9a913f89b561dded3c9"
   }
 }
